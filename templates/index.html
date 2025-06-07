@@ -598,6 +598,7 @@
             <strong>💡 How to use:</strong> Type in English or Franco-Arabic (like "7abibi", "salam"). 
             Press <strong>Space or Enter</strong> to auto-select the first suggestion, or use arrow keys to navigate and Enter to select.
             <br><strong>📋 Paste & Go:</strong> Paste any Latin text and it will automatically transliterate to Arabic!
+            <br><strong>🔄 Smart Auto-Convert:</strong> Text auto-transliterates when you press Space, Enter, or select suggestions!
         </div>
 
         <div class="input-section">
@@ -866,6 +867,28 @@
             suggestionsPopup.style.top = topOffset + 'px';
         }
 
+        // Auto-transliterate if there's remaining Latin text
+        function autoTransliterateIfNeeded() {
+            const text = textInput.value.trim();
+            if (text.length > 0) {
+                // Check if there's still Latin text that needs transliteration
+                const hasLatinText = /[a-zA-Z0-9]/.test(text);
+                if (hasLatinText) {
+                    // Count words to avoid auto-transliterating single words being typed
+                    const words = text.split(/\s+/).filter(word => word.trim().length > 0);
+                    const latinWords = words.filter(word => /[a-zA-Z0-9]/.test(word));
+                    
+                    // Only auto-transliterate if there are multiple words or completed words
+                    if (latinWords.length > 1 || (latinWords.length === 1 && text.endsWith(' '))) {
+                        showNotification('🔄 Auto-transliterating remaining text...', 'info');
+                        setTimeout(() => {
+                            transliterateAll();
+                        }, 200);
+                    }
+                }
+            }
+        }
+
         // Real-time suggestions as user types
         textInput.addEventListener('input', function(e) {
             updateWordCounter();
@@ -880,6 +903,13 @@
             } else {
                 hideSuggestions();
                 hideTypingIndicator();
+            }
+            
+            // Auto-transliterate on space after completing a word
+            if (e.inputType === 'insertText' && e.data === ' ') {
+                setTimeout(() => {
+                    autoTransliterateIfNeeded();
+                }, 500);
             }
         });
 
@@ -916,7 +946,15 @@
                 return;
             }
 
-            if (currentSuggestions.length === 0) return;
+            if (currentSuggestions.length === 0) {
+                // Auto-transliterate on Enter key when no suggestions are shown
+                if (e.key === 'Enter') {
+                    setTimeout(() => {
+                        autoTransliterateIfNeeded();
+                    }, 100);
+                }
+                return;
+            }
 
             switch(e.key) {
                 case 'ArrowDown':
@@ -1086,6 +1124,11 @@
             
             hideSuggestions();
             updateWordCounter();
+            
+            // Auto-transliterate remaining Latin text after suggestion selection
+            setTimeout(() => {
+                autoTransliterateIfNeeded();
+            }, 300);
             
             setTimeout(() => {
                 isSelectingSuggestion = false;
