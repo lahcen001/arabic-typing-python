@@ -355,6 +355,33 @@
             .copy-notification.hide {
                 transform: translateY(-50px);
             }
+
+            .text-controls-top .control-row {
+                flex-direction: column;
+                gap: 10px;
+                align-items: stretch;
+            }
+
+            .text-controls-top .control-group {
+                justify-content: space-between;
+                width: 100%;
+            }
+
+            .text-controls-top .control-group:last-child {
+                justify-content: center;
+                gap: 10px;
+            }
+
+            .text-controls-top .control-group select {
+                min-width: 80px;
+                flex: 1;
+                max-width: 120px;
+            }
+
+            .control-btn-small {
+                min-width: 70px;
+                padding: 8px 12px;
+            }
         }
 
         /* Scrollbar styling for suggestions */
@@ -377,6 +404,77 @@
             font-family: 'Cairo', 'Noto Sans Arabic', 'Amiri', serif;
             direction: rtl;
             text-align: right;
+        }
+
+        /* Text Controls Above Textarea */
+        .text-controls-top {
+            background: #f0f4ff;
+            border-radius: 12px;
+            padding: 15px 20px;
+            margin-bottom: 15px;
+            border: 2px solid #e8f0ff;
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.1);
+        }
+
+        .text-controls-top .control-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .text-controls-top .control-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .text-controls-top .control-group label {
+            font-weight: 600;
+            color: #555;
+            font-size: 0.9em;
+            min-width: 50px;
+        }
+
+        .text-controls-top .control-group select {
+            padding: 6px 10px;
+            border: 2px solid #d0d7de;
+            border-radius: 6px;
+            background: white;
+            font-size: 0.85em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-width: 100px;
+        }
+
+        .text-controls-top .control-group select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.2);
+        }
+
+        .control-btn-small {
+            padding: 6px 12px;
+            font-size: 0.8em;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 6px rgba(102, 126, 234, 0.2);
+            margin: 0 3px;
+            min-width: 60px;
+        }
+
+        .control-btn-small:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+
+        .control-btn-small:active {
+            transform: translateY(0);
         }
 
         /* Control Panel */
@@ -502,6 +600,39 @@
         </div>
 
         <div class="input-section">
+            <!-- Text Controls Above Textarea -->
+            <div class="text-controls-top">
+                <div class="control-row">
+                    <div class="control-group">
+                        <label for="fontSelectTop">📝 Font:</label>
+                        <select id="fontSelectTop" onchange="changeFontFamilyTop()">
+                            <option value="Cairo">Cairo</option>
+                            <option value="Noto Sans Arabic">Noto Sans Arabic</option>
+                            <option value="Amiri">Amiri</option>
+                            <option value="Arial">Arial</option>
+                            <option value="Tahoma">Tahoma</option>
+                        </select>
+                    </div>
+                    <div class="control-group">
+                        <label for="fontSizeSelectTop">📏 Size:</label>
+                        <select id="fontSizeSelectTop" onchange="changeFontSizeTop()">
+                            <option value="1em">Small</option>
+                            <option value="1.3em" selected>Medium</option>
+                            <option value="1.6em">Large</option>
+                            <option value="2em">Extra Large</option>
+                        </select>
+                    </div>
+                    <div class="control-group">
+                        <button class="control-btn-small" onclick="toggleTextDirection()" id="directionBtn">
+                            🔄 RTL
+                        </button>
+                        <button class="control-btn-small" onclick="clearText()">
+                            🗑️ Clear
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
             <div class="input-group">
                 <textarea id="textInput" placeholder="ابدأ بكتابة النص هنا... (مثل: salam 7abibi, ahlan wa sahlan)"></textarea>
                 <div class="typing-indicator" id="typingIndicator">⌨️</div>
@@ -1022,6 +1153,56 @@
             const fontSizeSelect = document.getElementById('fontSizeSelect');
             const selectedSize = fontSizeSelect.value;
             textInput.style.fontSize = selectedSize;
+        }
+
+        // Top controls functions (above textarea)
+        function changeFontFamilyTop() {
+            const fontSelectTop = document.getElementById('fontSelectTop');
+            const selectedFont = fontSelectTop.value;
+            textInput.style.fontFamily = `'${selectedFont}', 'Cairo', 'Noto Sans Arabic', 'Amiri', serif`;
+            
+            // Sync with bottom control panel
+            const fontSelect = document.getElementById('fontSelect');
+            if (fontSelect) {
+                fontSelect.value = selectedFont;
+            }
+        }
+
+        function changeFontSizeTop() {
+            const fontSizeSelectTop = document.getElementById('fontSizeSelectTop');
+            const selectedSize = fontSizeSelectTop.value;
+            textInput.style.fontSize = selectedSize;
+            
+            // Sync with bottom control panel
+            const fontSizeSelect = document.getElementById('fontSizeSelect');
+            if (fontSizeSelect) {
+                fontSizeSelect.value = selectedSize;
+            }
+        }
+
+        let isRTL = true; // Default is RTL
+        function toggleTextDirection() {
+            const directionBtn = document.getElementById('directionBtn');
+            
+            if (isRTL) {
+                // Switch to LTR
+                textInput.style.direction = 'ltr';
+                textInput.style.textAlign = 'left';
+                textInput.placeholder = 'Start typing here... (like: salam 7abibi, ahlan wa sahlan)';
+                directionBtn.textContent = '🔄 LTR';
+                directionBtn.title = 'Switch to Right-to-Left';
+                isRTL = false;
+            } else {
+                // Switch to RTL
+                textInput.style.direction = 'rtl';
+                textInput.style.textAlign = 'right';
+                textInput.placeholder = 'ابدأ بكتابة النص هنا... (مثل: salam 7abibi, ahlan wa sahlan)';
+                directionBtn.textContent = '🔄 RTL';
+                directionBtn.title = 'Switch to Left-to-Right';
+                isRTL = true;
+            }
+            
+            textInput.focus();
         }
 
         function copyAllText() {
