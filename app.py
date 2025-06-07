@@ -1,5 +1,11 @@
 from flask import Flask, render_template, request, jsonify
-from yamli import Yamli
+from yamliwrapper.yamli import Transliterator
+
+class Yamli:
+    def transliterate(self, word):
+        """Wrapper to match the expected API"""
+        transliterator = Transliterator(word)
+        return transliterator.candidates
 
 app = Flask(__name__)
 yamli = Yamli()
@@ -20,21 +26,23 @@ def privacy():
 def transliterate():
     try:
         data = request.get_json()
-        text = data.get('text', '')
+        text = data.get('text', '') or data.get('word', '')
         
         if not text:
-            return jsonify({'error': 'No text provided'}), 400
+            return jsonify({'error': 'No text provided', 'success': False}), 400
         
         # Get transliteration suggestions
         suggestions = yamli.transliterate(text)
         
         return jsonify({
-            'suggestions': suggestions,
+            'success': True,
+            'candidates': suggestions,
+            'best_match': suggestions[0] if suggestions else text,
             'original': text
         })
     
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        return jsonify({'error': str(e), 'success': False}), 500
 
 @app.route('/robots.txt')
 def robots_txt():
