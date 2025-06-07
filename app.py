@@ -1,40 +1,80 @@
-#!/usr/bin/env python3
-
 from flask import Flask, render_template, request, jsonify
-from yamliwrapper import Transliterator
-import json
+from yamli import Yamli
 
 app = Flask(__name__)
+yamli = Yamli()
 
 @app.route('/')
 def index():
     return render_template('index.html')
 
+@app.route('/terms')
+def terms():
+    return render_template('terms.html')
+
+@app.route('/privacy')
+def privacy():
+    return render_template('privacy.html')
+
 @app.route('/transliterate', methods=['POST'])
 def transliterate():
     try:
         data = request.get_json()
-        word = data.get('word', '').strip()
+        text = data.get('text', '')
         
-        if not word:
-            return jsonify({'error': 'No word provided'}), 400
+        if not text:
+            return jsonify({'error': 'No text provided'}), 400
         
-        # Create transliterator instance
-        transliterator = Transliterator(word)
-        candidates = transliterator.candidates
+        # Get transliteration suggestions
+        suggestions = yamli.transliterate(text)
         
         return jsonify({
-            'word': word,
-            'candidates': candidates,
-            'best_match': candidates[0] if candidates else None,
-            'success': True
+            'suggestions': suggestions,
+            'original': text
         })
-        
+    
     except Exception as e:
-        return jsonify({
-            'error': str(e),
-            'success': False
-        }), 500
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/robots.txt')
+def robots_txt():
+    """Generate robots.txt for SEO"""
+    robots_content = """User-agent: *
+Allow: /
+Allow: /terms
+Allow: /privacy
+Sitemap: https://arabizi.com/sitemap.xml
+
+# Crawl-delay for respectful crawling
+Crawl-delay: 1
+"""
+    return robots_content, 200, {'Content-Type': 'text/plain'}
+
+@app.route('/sitemap.xml')
+def sitemap_xml():
+    """Generate sitemap.xml for SEO"""
+    sitemap_content = """<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+    <url>
+        <loc>https://arabizi.com/</loc>
+        <lastmod>2024-12-01</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>1.0</priority>
+    </url>
+    <url>
+        <loc>https://arabizi.com/terms</loc>
+        <lastmod>2024-12-01</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.7</priority>
+    </url>
+    <url>
+        <loc>https://arabizi.com/privacy</loc>
+        <lastmod>2024-12-01</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.7</priority>
+    </url>
+</urlset>"""
+    return sitemap_content, 200, {'Content-Type': 'application/xml'}
 
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=5001) 
+    app.run(debug=True, port=5001) 

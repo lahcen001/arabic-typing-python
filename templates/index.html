@@ -1,13 +1,94 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Arabizi - Arabic Transliterator</title>
+    
+    <!-- Primary SEO Meta Tags -->
+    <title>Arabizi - Free Arabic Transliterator & Typing Tool | Convert English to Arabic Online</title>
+    <meta name="description" content="Free Arabic transliterator and typing tool. Convert English text to Arabic script instantly. Best Yamli alternative with smart suggestions, memory system, and copy history. Type Arabic easily online.">
+    <meta name="keywords" content="arabizi, arabic transliterator, arabic typing, yamli alternative, english to arabic converter, arabic keyboard online, arabic text converter, free arabic typing tool, transliterate arabic, arabic script converter, online arabic typing, arabic input method, franco arabic, arabic chat typing, arabic social media typing">
+    <meta name="author" content="Arabizi">
+    <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+    <link rel="canonical" href="https://arabizi.com/">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://arabizi.com/">
+    <meta property="og:title" content="Arabizi - Free Arabic Transliterator & Typing Tool">
+    <meta property="og:description" content="Convert English text to Arabic script instantly. Free online Arabic typing tool with smart suggestions and memory system.">
+    <meta property="og:image" content="https://arabizi.com/og-image.jpg">
+    <meta property="og:site_name" content="Arabizi">
+    <meta property="og:locale" content="en_US">
+    <meta property="og:locale:alternate" content="ar_SA">
+    
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://arabizi.com/">
+    <meta property="twitter:title" content="Arabizi - Free Arabic Transliterator & Typing Tool">
+    <meta property="twitter:description" content="Convert English text to Arabic script instantly. Free online Arabic typing tool with smart suggestions.">
+    <meta property="twitter:image" content="https://arabizi.com/twitter-image.jpg">
+    
+    <!-- Additional SEO Meta Tags -->
+    <meta name="theme-color" content="#667eea">
+    <meta name="msapplication-TileColor" content="#667eea">
+    <meta name="application-name" content="Arabizi">
+    <meta name="apple-mobile-web-app-title" content="Arabizi">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    
+    <!-- Language and Geographic Targeting -->
+    <meta name="language" content="English">
+    <meta name="geo.region" content="MENA">
+    <meta name="geo.placename" content="Middle East, North Africa">
+    
+    <!-- Structured Data for Rich Snippets -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "Arabizi",
+        "description": "Free Arabic transliterator and typing tool. Convert English text to Arabic script instantly with smart suggestions and memory system.",
+        "url": "https://arabizi.com",
+        "applicationCategory": "UtilityApplication",
+        "operatingSystem": "Web Browser",
+        "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD"
+        },
+        "featureList": [
+            "English to Arabic transliteration",
+            "Smart word suggestions",
+            "Memory system for learning preferences",
+            "Copy history tracking",
+            "Multiple Arabic fonts",
+            "Real-time conversion",
+            "Mobile responsive design"
+        ],
+        "browserRequirements": "Requires JavaScript",
+        "softwareVersion": "1.0",
+        "datePublished": "2024-12-01",
+        "creator": {
+            "@type": "Organization",
+            "name": "Arabizi"
+        },
+        "inLanguage": ["en", "ar"],
+        "audience": {
+            "@type": "Audience",
+            "audienceType": "Arabic speakers, Arabic learners, Social media users"
+        }
+    }
+    </script>
+    
     <!-- Arabic Font Imports -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400;1,700&family=Noto+Sans+Arabic:wght@100;200;300;400;500;600;700;800;900&family=Cairo:wght@200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <!-- Preload Critical Resources -->
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600&display=swap" as="style">
+    
     <style>
         * {
             margin: 0;
@@ -20,6 +101,7 @@
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
             padding: 20px;
@@ -125,6 +207,7 @@
             max-width: 1000px;
             width: 100%;
             text-align: center;
+            flex: 1;
         }
 
         .header {
@@ -144,6 +227,51 @@
         .header p {
             color: #666;
             font-size: 1.1em;
+        }
+
+        /* Footer */
+        .footer {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 20px;
+            max-width: 1000px;
+            width: 100%;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        .footer-links a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.3s ease;
+            padding: 5px 10px;
+        }
+
+        .footer-links a:hover {
+            color: #764ba2;
+        }
+
+        .footer-info {
+            color: #666;
+            font-size: 0.9em;
+            line-height: 1.5;
+        }
+
+        .footer-keywords {
+            margin-top: 10px;
+            font-size: 0.8em;
+            color: #999;
+            line-height: 1.4;
         }
 
         .input-section {
@@ -2111,5 +2239,31 @@
             }
         }
     </script>
+    
+    <!-- Footer Section for SEO -->
+    <footer class="footer">
+        <div class="footer-links">
+            <a href="/terms">Terms & Conditions</a>
+            <a href="/privacy">Privacy Policy</a>
+            <a href="https://github.com/lahcen001/arabic-typing-python" target="_blank" rel="noopener">GitHub</a>
+            <a href="#" onclick="showNotification('Contact us via GitHub for support! 📧', 'info')">Contact</a>
+        </div>
+        
+        <div class="footer-info">
+            <p><strong>🌙 Arabizi</strong> - Free Arabic Transliterator & Typing Tool</p>
+            <p>Convert English text to Arabic script instantly with smart suggestions and memory system.</p>
+            <p>Best alternative to Yamli for Arabic typing online. No registration required.</p>
+        </div>
+        
+        <div class="footer-keywords">
+            <p><small>
+                Arabic transliterator • Yamli alternative • English to Arabic converter • Arabic keyboard online • 
+                Arabic typing tool • Franco Arabic • Arabic chat typing • Online Arabic input • 
+                Arabic script converter • Free Arabic typing • Arabic social media typing • 
+                Arabic text converter • Transliterate Arabic • Arabic input method • 
+                Arabic writing tool • Online Arabic keyboard • Arabic typing software
+            </small></p>
+        </div>
+    </footer>
 </body>
 </html> 
