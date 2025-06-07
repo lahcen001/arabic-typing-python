@@ -1,6 +1,6 @@
-# 🌙 Yamli Web Interface
+# 🌙 Arabic Transliterator Web Interface
 
-A beautiful web interface for the Yamli Arabic Transliterator API.
+A beautiful web interface for the Arabic Transliterator API.
 
 ## 🚀 Quick Start
 
@@ -67,6 +67,6 @@ The system supports common Franco-Arabic number substitutions:
 
 - **Backend**: Flask (Python)
 - **Frontend**: Vanilla HTML/CSS/JavaScript
-- **API**: Yamli.com transliteration service
+- **API**: Arabic transliteration service
 - **Styling**: Modern CSS with gradients and animations
 - **Responsive**: Mobile-first design approach 

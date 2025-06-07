@@ -1,8 +1,8 @@
 [![Build Status](https://travis-ci.com/zaini/yamli-api.svg?token=DBtzE6aVUQsPLsj6qBSd&branch=master)](https://travis-ci.com/zaini/yamli-api)
 
-# yamli-api
-An API wrapper for Yamli.com
+# Arabic Transliterator API
+An API wrapper for Arabic transliteration services
 
-The Transliterator class takes a string and updates it's list of candidates to the Arabic transliterations provided by Yamli.com
+The Transliterator class takes a string and updates its list of candidates to Arabic transliterations.
 
 Providing a string with multiple words will make the candidates empty.
