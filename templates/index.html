@@ -562,12 +562,6 @@
                 <div class="word-counter" id="wordCounter">0 words</div>
                 <div class="suggestions-popup" id="suggestionsPopup"></div>
             </div>
-            <button class="btn" onclick="transliterateAll()" id="translateBtn">
-                Transliterate All ✨
-            </button>
-            <button class="btn clear-btn" onclick="clearText()" id="clearBtn">
-                Clear Text 🗑️
-            </button>
             <div class="loading" id="loading">Getting suggestions...</div>
         </div>
 
@@ -585,8 +579,6 @@
 
     <script>
         const textInput = document.getElementById('textInput');
-        const translateBtn = document.getElementById('translateBtn');
-        const clearBtn = document.getElementById('clearBtn');
         const loading = document.getElementById('loading');
         const suggestionsPopup = document.getElementById('suggestionsPopup');
         const typingIndicator = document.getElementById('typingIndicator');
@@ -1039,13 +1031,12 @@
             const text = textInput.value.trim();
             
             if (!text) {
-                alert('Please enter some text to transliterate');
+                showNotification('Please enter some text to transliterate! ❌', 'error');
                 return;
             }
 
             // Show loading state
-            translateBtn.disabled = true;
-            translateBtn.textContent = 'Transliterating... ⏳';
+            showNotification('🔄 Transliterating all text...', 'info');
             loading.style.display = 'block';
             hideSuggestions();
 
@@ -1076,13 +1067,12 @@
                 textInput.value = translatedWords.join(' ');
                 updateWordCounter();
                 textInput.focus();
+                showNotification('✨ Text transliterated successfully!', 'success');
                 
             } catch (error) {
-                alert('Network error: ' + error.message);
+                showNotification('Network error: ' + error.message + ' ❌', 'error');
             } finally {
                 // Hide loading state
-                translateBtn.disabled = false;
-                translateBtn.textContent = 'Transliterate All ✨';
                 loading.style.display = 'none';
             }
         }
