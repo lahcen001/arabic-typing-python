@@ -564,7 +564,7 @@
             <strong>💡 How to use:</strong> Type in English or Franco-Arabic (like "7abibi", "salam"). 
             Press <strong>Space or Enter</strong> to auto-select the first suggestion, or use arrow keys to navigate and Enter to select.
             <br><strong>📋 Paste & Go:</strong> Paste any Latin text and it will automatically transliterate to Arabic!
-            <br><strong>🔄 Smart Auto-Convert:</strong> Text auto-transliterates when you press Space, Enter, or select suggestions!
+            <br><strong>🔄 Smart Auto-Convert:</strong> Text auto-transliterates when you press Space, Enter, click textarea, or select suggestions!
         </div>
 
         <div class="input-section">
@@ -834,9 +834,18 @@
             
             // Auto-transliterate on space after completing a word
             if (e.inputType === 'insertText' && e.data === ' ') {
-                setTimeout(() => {
-                    autoTransliterateIfNeeded();
-                }, 500);
+                const text = textInput.value.trim();
+                if (text.length > 0) {
+                    const hasLatinText = /[a-zA-Z0-9]/.test(text);
+                    if (hasLatinText) {
+                        setTimeout(() => {
+                            showNotification('⌨️ Space detected! Auto-transliterating...', 'info');
+                            setTimeout(() => {
+                                transliterateAll();
+                            }, 200);
+                        }, 100);
+                    }
+                }
             }
         });
 
@@ -871,6 +880,23 @@
                 e.preventDefault();
                 selectSuggestion(currentSuggestions[0], true); // true = add space after
                 return;
+            }
+            
+            // Auto-transliterate on space when no suggestions are shown
+            if (e.key === ' ' && currentSuggestions.length === 0) {
+                const text = textInput.value.trim();
+                if (text.length > 0) {
+                    const hasLatinText = /[a-zA-Z0-9]/.test(text);
+                    if (hasLatinText) {
+                        // Don't prevent default - let space be added first
+                        setTimeout(() => {
+                            showNotification('⌨️ Space pressed! Auto-transliterating...', 'info');
+                            setTimeout(() => {
+                                transliterateAll();
+                            }, 300);
+                        }, 50);
+                    }
+                }
             }
 
             if (currentSuggestions.length === 0) {
