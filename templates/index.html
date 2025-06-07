@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title> Arabic Transliterator</title>
+    <title>Arabizi - Arabic Transliterator</title>
     <!-- Arabic Font Imports -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -246,6 +246,14 @@
         @keyframes pulse {
             0%, 100% { opacity: 1; }
             50% { opacity: 0.7; }
+        }
+
+        /* Double-click copy animation */
+        .copy-success {
+            background: linear-gradient(90deg, #d4edda, #c3e6cb) !important;
+            transform: scale(1.02) !important;
+            transition: all 0.3s ease !important;
+            box-shadow: 0 0 20px rgba(40, 167, 69, 0.3) !important;
         }
 
         .examples {
@@ -556,7 +564,7 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>🌙 Transliterator</h1>
+            <h1>🌙 Arabizi</h1>
             <p>Convert English/Franco-Arabic text to beautiful Arabic script</p>
         </div>
 
@@ -565,6 +573,7 @@
             Press <strong>Space or Enter</strong> to auto-select the first suggestion, or use arrow keys to navigate and Enter to select.
             <br><strong>📋 Paste & Go:</strong> Paste any Latin text and it will automatically transliterate to Arabic!
             <br><strong>🔄 Smart Auto-Convert:</strong> Text auto-transliterates when you press Space, Enter, click textarea, or select suggestions!
+            <br><strong>📋 Quick Copy:</strong> Double-click anywhere on the textarea to instantly copy all text to clipboard!
         </div>
 
         <div class="input-section">
@@ -967,6 +976,41 @@
                     hideSuggestions();
                 }
             }, 10);
+        });
+
+        // Double-click to copy all text
+        textInput.addEventListener('dblclick', function(e) {
+            e.preventDefault(); // Prevent text selection
+            
+            const text = textInput.value;
+            if (!text.trim()) {
+                showNotification('No text to copy! ❌', 'error');
+                return;
+            }
+            
+            // Copy text to clipboard
+            navigator.clipboard.writeText(text).then(() => {
+                showNotification('📋 Double-click detected! Text copied to clipboard! ✨', 'success');
+                
+                // Add visual feedback to textarea
+                textInput.classList.add('copy-success');
+                
+                setTimeout(() => {
+                    textInput.classList.remove('copy-success');
+                }, 600);
+                
+            }).catch(() => {
+                // Fallback for older browsers
+                textInput.select();
+                document.execCommand('copy');
+                showNotification('📋 Double-click detected! Text copied to clipboard! ✨', 'success');
+                
+                // Add visual feedback
+                textInput.classList.add('copy-success');
+                setTimeout(() => {
+                    textInput.classList.remove('copy-success');
+                }, 600);
+            });
         });
 
         // Hide suggestions when clicking outside

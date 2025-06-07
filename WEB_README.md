@@ -1,6 +1,6 @@
-# 🌙 Arabic Transliterator Web Interface
+# 🌙 Arabizi - Arabic Transliterator Web Interface
 
-A beautiful web interface for the Arabic Transliterator API.
+A beautiful web interface for the Arabizi Arabic Transliterator API.
 
 ## 🚀 Quick Start
 
