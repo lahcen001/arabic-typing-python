@@ -218,44 +218,17 @@
             font-style: italic;
         }
 
-        /* Enhanced Loader Animation */
-        .loader-container {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            z-index: 10000;
-            backdrop-filter: blur(3px);
-        }
-
-        .loader {
-            background: white;
-            padding: 30px 40px;
-            border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-            text-align: center;
-            max-width: 300px;
-        }
-
-        .loader h3 {
-            color: #667eea;
-            margin-bottom: 20px;
-            font-size: 1.2em;
-        }
-
-        .spinner {
-            width: 50px;
-            height: 50px;
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #667eea;
+        /* Small Inline Loader */
+        .inline-loader {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #667eea;
             border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 15px;
+            animation: spin 0.8s linear infinite;
+            margin: 0 5px;
+            vertical-align: middle;
         }
 
         @keyframes spin {
@@ -263,32 +236,16 @@
             100% { transform: rotate(360deg); }
         }
 
-        .loader-text {
-            color: #666;
-            font-size: 0.9em;
-            margin-top: 10px;
-        }
-
-        .progress-bar {
-            width: 100%;
-            height: 6px;
-            background: #f0f0f0;
+        .processing-text {
+            background: linear-gradient(90deg, #fff3cd, #ffeaa7);
+            padding: 2px 4px;
             border-radius: 3px;
-            overflow: hidden;
-            margin-top: 15px;
+            animation: pulse 1.5s ease-in-out infinite;
         }
 
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #667eea, #764ba2);
-            border-radius: 3px;
-            animation: progress 2s ease-in-out infinite;
-        }
-
-        @keyframes progress {
-            0% { width: 0%; }
-            50% { width: 70%; }
-            100% { width: 100%; }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
         }
 
         .examples {
@@ -671,25 +628,12 @@
         </div>
     </div>
 
-    <!-- Enhanced Loader -->
-    <div class="loader-container" id="loaderContainer">
-        <div class="loader">
-            <h3>🌙 Transliterating</h3>
-            <div class="spinner"></div>
-            <div class="loader-text">Converting your text to beautiful Arabic...</div>
-            <div class="progress-bar">
-                <div class="progress-fill"></div>
-            </div>
-        </div>
-    </div>
-
     <script>
         const textInput = document.getElementById('textInput');
         const loading = document.getElementById('loading');
         const suggestionsPopup = document.getElementById('suggestionsPopup');
         const typingIndicator = document.getElementById('typingIndicator');
         const wordCounter = document.getElementById('wordCounter');
-        const loaderContainer = document.getElementById('loaderContainer');
 
         let currentSuggestions = [];
         let selectedSuggestionIndex = -1;
@@ -1153,46 +1097,62 @@
                 return;
             }
 
-            // Show enhanced loader
-            showLoader();
+            // Show notification and add inline loaders
+            showNotification('🔄 Transliterating text...', 'info');
             hideSuggestions();
 
             try {
                 const words = text.split(/\s+/);
+                let currentText = text;
+                
+                // Add loaders to Latin words
+                for (let i = 0; i < words.length; i++) {
+                    const word = words[i];
+                    if (word.trim() && /[a-zA-Z0-9]/.test(word)) {
+                        const loaderHTML = `<span class="processing-text">${word}<span class="inline-loader"></span></span>`;
+                        currentText = currentText.replace(word, loaderHTML);
+                    }
+                }
+                
+                // Temporarily show text with loaders (using innerHTML simulation)
+                const originalValue = textInput.value;
+                textInput.style.background = 'linear-gradient(90deg, #fff9e6, #ffeaa7)';
+                
                 const translatedWords = [];
                 
                 for (const word of words) {
                     if (word.trim()) {
-                        const response = await fetch('/transliterate', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                            },
-                            body: JSON.stringify({ word: word.trim() })
-                        });
+                        if (/[a-zA-Z0-9]/.test(word)) {
+                            const response = await fetch('/transliterate', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                },
+                                body: JSON.stringify({ word: word.trim() })
+                            });
 
-                        const data = await response.json();
-                        if (data.success && data.best_match) {
-                            translatedWords.push(data.best_match);
+                            const data = await response.json();
+                            if (data.success && data.best_match) {
+                                translatedWords.push(data.best_match);
+                            } else {
+                                translatedWords.push(word); // Keep original if no translation
+                            }
                         } else {
-                            translatedWords.push(word); // Keep original if no translation
+                            translatedWords.push(word); // Keep Arabic words as is
                         }
                     }
                 }
 
                 // Replace text in textarea
                 textInput.value = translatedWords.join(' ');
+                textInput.style.background = ''; // Reset background
                 updateWordCounter();
                 textInput.focus();
                 
-                // Small delay to show completion
-                setTimeout(() => {
-                    hideLoader();
-                    showNotification('✨ Text transliterated successfully!', 'success');
-                }, 500);
+                showNotification('✨ Text transliterated successfully!', 'success');
                 
             } catch (error) {
-                hideLoader();
+                textInput.style.background = ''; // Reset background on error
                 showNotification('Network error: ' + error.message + ' ❌', 'error');
             }
         }
@@ -1408,17 +1368,6 @@
             URL.revokeObjectURL(url);
             
             alert('HTML file downloaded! You can open it in a browser and save as PDF. 📄');
-        }
-
-        // Enhanced loader functions
-        function showLoader() {
-            loaderContainer.style.display = 'flex';
-            document.body.style.overflow = 'hidden'; // Prevent scrolling
-        }
-        
-        function hideLoader() {
-            loaderContainer.style.display = 'none';
-            document.body.style.overflow = 'auto'; // Restore scrolling
         }
     </script>
 </body>
