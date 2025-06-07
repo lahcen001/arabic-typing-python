@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title> Arabic Transliterator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 25px;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+            padding: 50px;
+            max-width: 1000px;
+            width: 100%;
+            text-align: center;
+        }
+
+        .header {
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            color: #333;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 1.1em;
+        }
+
+        .input-section {
+            margin-bottom: 40px;
+        }
+
+        .input-group {
+            position: relative;
+            margin-bottom: 25px;
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 300px;
+            padding: 25px;
+            font-size: 1.3em;
+            border: 3px solid #e0e0e0;
+            border-radius: 20px;
+            outline: none;
+            transition: all 0.3s ease;
+            resize: vertical;
+            font-family: 'Arial', 'Tahoma', sans-serif;
+            line-height: 1.8;
+            direction: rtl;
+            text-align: right;
+            background: #fafafa;
+            box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        textarea:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 25px rgba(102, 126, 234, 0.3), inset 0 2px 10px rgba(0, 0, 0, 0.05);
+            background: white;
+        }
+
+        /* Suggestions Popup */
+        .suggestions-popup {
+            position: absolute;
+            background: white;
+            border: 2px solid #667eea;
+            border-radius: 12px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+            max-height: 180px;
+            overflow-y: auto;
+            z-index: 1000;
+            display: none;
+            margin-top: 5px;
+            min-width: 180px;
+            max-width: 250px;
+        }
+
+        .suggestion-item {
+            padding: 8px 15px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border-bottom: 1px solid #f0f0f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.9em;
+        }
+
+        .suggestion-item:last-child {
+            border-bottom: none;
+        }
+
+        .suggestion-item:hover {
+            background: #f8f9ff;
+            color: #667eea;
+        }
+
+        .suggestion-item.selected {
+            background: #667eea;
+            color: white;
+        }
+
+        .suggestion-item.first-suggestion {
+            background: #e8f2ff;
+            border-left: 3px solid #667eea;
+        }
+
+        .suggestion-item.first-suggestion.selected {
+            background: #667eea;
+            color: white;
+        }
+
+        .arabic-text {
+            font-size: 1.1em;
+            font-weight: bold;
+            direction: rtl;
+        }
+
+        .suggestion-hint {
+            font-size: 0.7em;
+            color: #999;
+        }
+
+        .suggestion-item:hover .suggestion-hint {
+            color: #667eea;
+        }
+
+        .suggestion-item.selected .suggestion-hint {
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.1em;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+            margin: 0 10px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn.clear-btn {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a52);
+            box-shadow: 0 5px 15px rgba(255, 107, 107, 0.3);
+        }
+
+        .btn.clear-btn:hover {
+            box-shadow: 0 8px 25px rgba(255, 107, 107, 0.4);
+        }
+
+        .loading {
+            display: none;
+            color: #667eea;
+            font-style: italic;
+        }
+
+        .examples {
+            margin-top: 30px;
+            text-align: center;
+        }
+
+        .example-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 15px;
+        }
+
+        .example-btn {
+            background: #f8f9fa;
+            border: 2px solid #e0e0e0;
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9em;
+        }
+
+        .example-btn:hover {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .typing-indicator {
+            position: absolute;
+            left: 15px;
+            top: 15px;
+            color: #667eea;
+            font-size: 0.9em;
+            display: none;
+        }
+
+        .instructions {
+            background: #e8f2ff;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+            font-size: 0.9em;
+            color: #555;
+        }
+
+        .instructions strong {
+            color: #667eea;
+        }
+
+        .word-counter {
+            position: absolute;
+            bottom: 10px;
+            left: 15px;
+            font-size: 0.8em;
+            color: #999;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .candidates {
+                grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            }
+
+            .suggestions-popup {
+                max-height: 150px;
+                min-width: 150px;
+                max-width: 200px;
+            }
+
+            .suggestion-item {
+                padding: 6px 12px;
+                font-size: 0.85em;
+            }
+
+            .arabic-text {
+                font-size: 1em;
+            }
+
+            .suggestion-hint {
+                font-size: 0.65em;
+            }
+
+            .btn {
+                margin: 5px;
+                padding: 12px 30px;
+            }
+        }
+
+        /* Scrollbar styling for suggestions */
+        .suggestions-popup::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .suggestions-popup::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+
+        .suggestions-popup::-webkit-scrollbar-thumb {
+            background: #667eea;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🌙 Transliterator</h1>
+            <p>Convert English/Franco-Arabic text to beautiful Arabic script</p>
+        </div>
+
+        <div class="instructions">
+            <strong>💡 How to use:</strong> Type in English or Franco-Arabic (like "7abibi", "salam"). 
+            Press <strong>Space or Enter</strong> to auto-select the first suggestion, or use arrow keys to navigate and Enter to select.
+        </div>
+
+        <div class="input-section">
+            <div class="input-group">
+                <textarea id="textInput" placeholder="ابدأ بكتابة النص هنا... (مثل: salam 7abibi, ahlan wa sahlan)"></textarea>
+                <div class="typing-indicator" id="typingIndicator">⌨️</div>
+                <div class="word-counter" id="wordCounter">0 words</div>
+                <div class="suggestions-popup" id="suggestionsPopup"></div>
+            </div>
+            <button class="btn" onclick="transliterateAll()" id="translateBtn">
+                Transliterate All ✨
+            </button>
+            <button class="btn clear-btn" onclick="clearText()" id="clearBtn">
+                Clear Text 🗑️
+            </button>
+            <div class="loading" id="loading">Getting suggestions...</div>
+        </div>
+
+        <div class="examples">
+            <h3>Try these examples:</h3>
+            <div class="example-buttons">
+                <span class="example-btn" onclick="setExample('salam 7abibi')">salam 7abibi</span>
+                <span class="example-btn" onclick="setExample('ahlan wa sahlan')">ahlan wa sahlan</span>
+                <span class="example-btn" onclick="setExample('shukran jazeelan')">shukran jazeelan</span>
+                <span class="example-btn" onclick="setExample('mabrook 3ala')">mabrook 3ala</span>
+                <span class="example-btn" onclick="setExample('wa7da tneyn')">wa7da tneyn</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const textInput = document.getElementById('textInput');
+        const translateBtn = document.getElementById('translateBtn');
+        const clearBtn = document.getElementById('clearBtn');
+        const loading = document.getElementById('loading');
+        const suggestionsPopup = document.getElementById('suggestionsPopup');
+        const typingIndicator = document.getElementById('typingIndicator');
+        const wordCounter = document.getElementById('wordCounter');
+
+        let currentSuggestions = [];
+        let selectedSuggestionIndex = -1;
+        let typingTimer;
+        let isSelectingSuggestion = false;
+        let currentWordStart = 0;
+        let currentWordEnd = 0;
+        let currentWord = '';
+
+        // Update word counter
+        function updateWordCounter() {
+            const text = textInput.value.trim();
+            const words = text ? text.split(/\s+/).length : 0;
+            wordCounter.textContent = `${words} word${words !== 1 ? 's' : ''}`;
+        }
+
+        // Get current word being typed
+        function getCurrentWord() {
+            const text = textInput.value;
+            const cursorPos = textInput.selectionStart;
+            
+            // Find word boundaries
+            let start = cursorPos;
+            let end = cursorPos;
+            
+            // Find start of current word
+            while (start > 0 && !/\s/.test(text[start - 1])) {
+                start--;
+            }
+            
+            // Find end of current word
+            while (end < text.length && !/\s/.test(text[end])) {
+                end++;
+            }
+            
+            currentWordStart = start;
+            currentWordEnd = end;
+            currentWord = text.substring(start, end);
+            
+            return currentWord;
+        }
+
+        // Position suggestions popup near current word
+        function positionSuggestions() {
+            const textRect = textInput.getBoundingClientRect();
+            const textStyle = window.getComputedStyle(textInput);
+            
+            // Create a temporary element to measure text
+            const measurer = document.createElement('div');
+            measurer.style.cssText = `
+                position: absolute;
+                visibility: hidden;
+                white-space: pre;
+                font-family: ${textStyle.fontFamily};
+                font-size: ${textStyle.fontSize};
+                line-height: ${textStyle.lineHeight};
+                padding: ${textStyle.padding};
+                border: ${textStyle.border};
+                direction: rtl;
+                text-align: right;
+            `;
+            
+            // Get text up to cursor position
+            const textBeforeCursor = textInput.value.substring(0, textInput.selectionStart);
+            const lines = textBeforeCursor.split('\n');
+            const currentLine = lines[lines.length - 1];
+            
+            measurer.textContent = currentLine;
+            document.body.appendChild(measurer);
+            
+            const textWidth = measurer.offsetWidth;
+            const lineHeight = parseInt(textStyle.lineHeight) || 24;
+            
+            document.body.removeChild(measurer);
+            
+            // Calculate position (RTL aware) - position below cursor with offset
+            const containerRect = textInput.parentElement.getBoundingClientRect();
+            const leftOffset = Math.max(10, textRect.width - textWidth - 20);
+            const topOffset = (lines.length - 1) * lineHeight + lineHeight + 25; // Increased from 10px to 25px offset
+            
+            suggestionsPopup.style.left = leftOffset + 'px';
+            suggestionsPopup.style.top = topOffset + 'px';
+        }
+
+        // Real-time suggestions as user types
+        textInput.addEventListener('input', function(e) {
+            updateWordCounter();
+            const word = getCurrentWord().trim();
+            
+            if (word.length > 0 && !isSelectingSuggestion) {
+                showTypingIndicator();
+                clearTimeout(typingTimer);
+                typingTimer = setTimeout(() => {
+                    getSuggestions(word);
+                }, 300); // Debounce for 300ms
+            } else {
+                hideSuggestions();
+                hideTypingIndicator();
+            }
+        });
+
+        // Handle keyboard navigation and space for auto-selection
+        textInput.addEventListener('keydown', function(e) {
+            if (e.key === ' ' && currentSuggestions.length > 0) {
+                // Always auto-select first suggestion on space, regardless of selection state
+                e.preventDefault();
+                selectSuggestion(currentSuggestions[0], true); // true = add space after
+                return;
+            }
+
+            if (currentSuggestions.length === 0) return;
+
+            switch(e.key) {
+                case 'ArrowDown':
+                    e.preventDefault();
+                    selectedSuggestionIndex = Math.min(selectedSuggestionIndex + 1, currentSuggestions.length - 1);
+                    updateSuggestionSelection();
+                    break;
+                case 'ArrowUp':
+                    e.preventDefault();
+                    selectedSuggestionIndex = Math.max(selectedSuggestionIndex - 1, -1);
+                    updateSuggestionSelection();
+                    break;
+                case 'Enter':
+                    e.preventDefault();
+                    if (selectedSuggestionIndex >= 0) {
+                        // Select the highlighted suggestion
+                        selectSuggestion(currentSuggestions[selectedSuggestionIndex]);
+                    } else {
+                        // Select the first suggestion if none is highlighted
+                        selectSuggestion(currentSuggestions[0]);
+                    }
+                    break;
+                case 'Escape':
+                    hideSuggestions();
+                    break;
+            }
+        });
+
+        // Update cursor position tracking
+        textInput.addEventListener('click', function() {
+            setTimeout(() => {
+                const word = getCurrentWord().trim();
+                if (word.length > 0) {
+                    getSuggestions(word);
+                } else {
+                    hideSuggestions();
+                }
+            }, 10);
+        });
+
+        // Hide suggestions when clicking outside
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.input-group')) {
+                hideSuggestions();
+            }
+        });
+
+        function showTypingIndicator() {
+            typingIndicator.style.display = 'block';
+        }
+
+        function hideTypingIndicator() {
+            typingIndicator.style.display = 'none';
+        }
+
+        async function getSuggestions(word) {
+            try {
+                const response = await fetch('/transliterate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ word: word })
+                });
+
+                const data = await response.json();
+                hideTypingIndicator();
+
+                if (data.success && data.candidates && data.candidates.length > 0) {
+                    showSuggestions(data.candidates, word);
+                } else {
+                    hideSuggestions();
+                }
+            } catch (error) {
+                hideTypingIndicator();
+                hideSuggestions();
+            }
+        }
+
+        function showSuggestions(candidates, originalWord) {
+            currentSuggestions = candidates;
+            selectedSuggestionIndex = -1;
+            
+            let html = '';
+            candidates.slice(0, 8).forEach((candidate, index) => { // Show max 8 suggestions
+                const isFirst = index === 0;
+                html += `
+                    <div class="suggestion-item ${isFirst ? 'first-suggestion' : ''}" onclick="selectSuggestion('${candidate}')" data-index="${index}">
+                        <span class="arabic-text">${candidate}</span>
+                        <span class="suggestion-hint">${isFirst ? 'Space to select' : 'Click to select'}</span>
+                    </div>
+                `;
+            });
+
+            suggestionsPopup.innerHTML = html;
+            positionSuggestions();
+            suggestionsPopup.style.display = 'block';
+        }
+
+        function hideSuggestions() {
+            suggestionsPopup.style.display = 'none';
+            currentSuggestions = [];
+            selectedSuggestionIndex = -1;
+        }
+
+        function updateSuggestionSelection() {
+            const items = suggestionsPopup.querySelectorAll('.suggestion-item');
+            items.forEach((item, index) => {
+                if (index === selectedSuggestionIndex) {
+                    item.classList.add('selected');
+                } else {
+                    item.classList.remove('selected');
+                }
+            });
+        }
+
+        function selectSuggestion(arabicText, addSpace = false) {
+            isSelectingSuggestion = true;
+            
+            // Get current cursor position and text
+            const cursorPos = textInput.selectionStart;
+            const text = textInput.value;
+            
+            // Find the exact word boundaries more precisely
+            let wordStart = cursorPos;
+            let wordEnd = cursorPos;
+            
+            // Move backward to find start of word (stop at space, newline, or start of text)
+            while (wordStart > 0 && !/[\s\n]/.test(text[wordStart - 1])) {
+                wordStart--;
+            }
+            
+            // Move forward to find end of word (stop at space, newline, or end of text)
+            while (wordEnd < text.length && !/[\s\n]/.test(text[wordEnd])) {
+                wordEnd++;
+            }
+            
+            // Replace the entire word with Arabic text
+            const beforeWord = text.substring(0, wordStart);
+            const afterWord = text.substring(wordEnd);
+            const newText = beforeWord + arabicText + (addSpace ? ' ' : '') + afterWord;
+            
+            textInput.value = newText;
+            
+            // Position cursor after the inserted Arabic text
+            const newCursorPos = wordStart + arabicText.length + (addSpace ? 1 : 0);
+            textInput.setSelectionRange(newCursorPos, newCursorPos);
+            
+            hideSuggestions();
+            updateWordCounter();
+            
+            setTimeout(() => {
+                isSelectingSuggestion = false;
+                textInput.focus();
+            }, 100);
+        }
+
+        function setExample(text) {
+            textInput.value = text;
+            textInput.focus();
+            updateWordCounter();
+            // Position cursor at end
+            textInput.setSelectionRange(text.length, text.length);
+        }
+
+        function clearText() {
+            textInput.value = '';
+            textInput.focus();
+            updateWordCounter();
+            hideSuggestions();
+        }
+
+        async function transliterateAll() {
+            const text = textInput.value.trim();
+            
+            if (!text) {
+                alert('Please enter some text to transliterate');
+                return;
+            }
+
+            // Show loading state
+            translateBtn.disabled = true;
+            translateBtn.textContent = 'Transliterating... ⏳';
+            loading.style.display = 'block';
+            hideSuggestions();
+
+            try {
+                const words = text.split(/\s+/);
+                const translatedWords = [];
+                
+                for (const word of words) {
+                    if (word.trim()) {
+                        const response = await fetch('/transliterate', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({ word: word.trim() })
+                        });
+
+                        const data = await response.json();
+                        if (data.success && data.best_match) {
+                            translatedWords.push(data.best_match);
+                        } else {
+                            translatedWords.push(word); // Keep original if no translation
+                        }
+                    }
+                }
+
+                // Replace text in textarea
+                textInput.value = translatedWords.join(' ');
+                updateWordCounter();
+                textInput.focus();
+                
+            } catch (error) {
+                alert('Network error: ' + error.message);
+            } finally {
+                // Hide loading state
+                translateBtn.disabled = false;
+                translateBtn.textContent = 'Transliterate All ✨';
+                loading.style.display = 'none';
+            }
+        }
+
+        // Initialize
+        window.onload = function() {
+            textInput.focus();
+            updateWordCounter();
+        };
+    </script>
+</body>
+</html> 
