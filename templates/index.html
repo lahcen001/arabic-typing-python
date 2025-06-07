@@ -540,6 +540,15 @@
                 max-height: 50px;
                 -webkit-line-clamp: 2;
             }
+
+            .history-clear {
+                font-size: 0.7em;
+                padding: 4px 8px;
+            }
+
+            .history-controls {
+                gap: 8px;
+            }
         }
 
         /* Scrollbar styling for suggestions */
@@ -864,6 +873,29 @@
             align-items: center;
         }
 
+        .history-controls {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .history-clear {
+            background: rgba(255, 107, 107, 0.8);
+            border: none;
+            color: white;
+            font-size: 0.8em;
+            cursor: pointer;
+            padding: 5px 10px;
+            border-radius: 15px;
+            transition: all 0.3s ease;
+            font-weight: bold;
+        }
+
+        .history-clear:hover {
+            background: rgba(255, 107, 107, 1);
+            transform: scale(1.05);
+        }
+
         .history-close {
             background: none;
             border: none;
@@ -999,7 +1031,10 @@
     <div class="copy-history-panel" id="copyHistoryPanel">
         <div class="history-header">
             <span>📋 Copy History</span>
-            <button class="history-close" onclick="toggleCopyHistory()">×</button>
+            <div class="history-controls">
+                <button class="history-clear" onclick="clearCopyHistory()">🗑️ Clear</button>
+                <button class="history-close" onclick="toggleCopyHistory()">×</button>
+            </div>
         </div>
         <div class="history-content" id="historyContent">
             <div class="history-empty">No copied texts yet</div>
@@ -1018,7 +1053,7 @@
             <br><strong>📋 Paste & Go:</strong> Paste any Latin text and it will automatically transliterate to Arabic!
             <br><strong>🔄 Smart Auto-Convert:</strong> Text auto-transliterates when you press Space, Enter, click textarea, or select suggestions!
             <br><strong>📋 Quick Copy:</strong> Double-click anywhere on the textarea to instantly copy all text to clipboard!
-            <br><strong>🕒 Copy History:</strong> Click the 📋 button (top-right) to access your last 10 copied texts anytime!
+            <br><strong>🕒 Copy History:</strong> Click the 📋 button (top-right) to access your last 10 copied texts anytime! Use 🗑️ Clear to delete history.
         </div>
 
         <div class="input-section">
@@ -2060,6 +2095,20 @@
                 showNotification('📋 Text copied from history! ✨', 'success');
                 addToCopyHistory(item.text);
             });
+        }
+
+        function clearCopyHistory() {
+            if (copyHistory.length === 0) {
+                showNotification('History is already empty! 📭', 'info');
+                return;
+            }
+            
+            if (confirm('Are you sure you want to clear all copy history? This action cannot be undone.')) {
+                copyHistory = [];
+                saveCopyHistory();
+                updateHistoryDisplay();
+                showNotification('🗑️ Copy history cleared successfully!', 'success');
+            }
         }
     </script>
 </body>
