@@ -145,6 +145,20 @@
             color: white;
         }
 
+        .suggestion-item.preferred-suggestion {
+            background: #fff8e1;
+            border-left: 3px solid #ffa726;
+        }
+
+        .suggestion-item.preferred-suggestion:hover {
+            background: #fff3c4;
+        }
+
+        .suggestion-item.preferred-suggestion.selected {
+            background: #ffa726;
+            color: white;
+        }
+
         .arabic-text {
             font-size: 1.1em;
             font-weight: bold;
@@ -568,6 +582,82 @@
         let currentWordStart = 0;
         let currentWordEnd = 0;
         let currentWord = '';
+        
+        // Memory system for user preferences
+        let userPreferences = {};
+        
+        // Load preferences from localStorage
+        function loadUserPreferences() {
+            try {
+                const saved = localStorage.getItem('arabicTransliteratorPreferences');
+                if (saved) {
+                    userPreferences = JSON.parse(saved);
+                }
+            } catch (error) {
+                console.log('Could not load user preferences');
+                userPreferences = {};
+            }
+        }
+        
+        // Save preferences to localStorage
+        function saveUserPreferences() {
+            try {
+                localStorage.setItem('arabicTransliteratorPreferences', JSON.stringify(userPreferences));
+            } catch (error) {
+                console.log('Could not save user preferences');
+            }
+        }
+        
+        // Record user selection for learning
+        function recordUserSelection(latinWord, selectedArabic, allCandidates) {
+            if (!latinWord || !selectedArabic) return;
+            
+            const key = latinWord.toLowerCase();
+            
+            if (!userPreferences[key]) {
+                userPreferences[key] = {};
+            }
+            
+            // Increment selection count for this Arabic option
+            if (!userPreferences[key][selectedArabic]) {
+                userPreferences[key][selectedArabic] = 0;
+            }
+            userPreferences[key][selectedArabic]++;
+            
+            // Save to localStorage
+            saveUserPreferences();
+        }
+        
+        // Reorder suggestions based on user preferences
+        function reorderSuggestionsByPreference(latinWord, candidates) {
+            if (!latinWord || !candidates || candidates.length === 0) {
+                return candidates;
+            }
+            
+            const key = latinWord.toLowerCase();
+            const preferences = userPreferences[key];
+            
+            if (!preferences) {
+                return candidates; // No preferences recorded yet
+            }
+            
+            // Create array with preference scores
+            const candidatesWithScores = candidates.map(candidate => ({
+                text: candidate,
+                score: preferences[candidate] || 0
+            }));
+            
+            // Sort by preference score (highest first), then maintain original order for ties
+            candidatesWithScores.sort((a, b) => {
+                if (b.score !== a.score) {
+                    return b.score - a.score; // Higher score first
+                }
+                // If scores are equal, maintain original order
+                return candidates.indexOf(a.text) - candidates.indexOf(b.text);
+            });
+            
+            return candidatesWithScores.map(item => item.text);
+        }
 
         // Update word counter
         function updateWordCounter() {
@@ -761,16 +851,20 @@
         }
 
         function showSuggestions(candidates, originalWord) {
-            currentSuggestions = candidates;
+            // Reorder candidates based on user preferences
+            const reorderedCandidates = reorderSuggestionsByPreference(originalWord, candidates);
+            currentSuggestions = reorderedCandidates;
             selectedSuggestionIndex = -1;
             
             let html = '';
-            candidates.slice(0, 8).forEach((candidate, index) => { // Show max 8 suggestions
+            reorderedCandidates.slice(0, 8).forEach((candidate, index) => { // Show max 8 suggestions
                 const isFirst = index === 0;
+                const isPreferred = userPreferences[originalWord.toLowerCase()] && 
+                                  userPreferences[originalWord.toLowerCase()][candidate] > 0;
                 html += `
-                    <div class="suggestion-item ${isFirst ? 'first-suggestion' : ''}" onclick="selectSuggestion('${candidate}')" data-index="${index}">
+                    <div class="suggestion-item ${isFirst ? 'first-suggestion' : ''} ${isPreferred ? 'preferred-suggestion' : ''}" onclick="selectSuggestion('${candidate}')" data-index="${index}">
                         <span class="arabic-text">${candidate}</span>
-                        <span class="suggestion-hint">${isFirst ? 'Space to select' : 'Click to select'}</span>
+                        <span class="suggestion-hint">${isFirst ? 'Space to select' : 'Click to select'}${isPreferred ? ' ⭐' : ''}</span>
                     </div>
                 `;
             });
@@ -799,6 +893,11 @@
 
         function selectSuggestion(arabicText, addSpace = false) {
             isSelectingSuggestion = true;
+            
+            // Record this selection for learning (store the original Latin word)
+            if (currentWord && currentWord.trim()) {
+                recordUserSelection(currentWord.trim(), arabicText, currentSuggestions);
+            }
             
             // Get current cursor position and text
             const cursorPos = textInput.selectionStart;
@@ -909,6 +1008,7 @@
         window.onload = function() {
             textInput.focus();
             updateWordCounter();
+            loadUserPreferences();
         };
 
         // Font and text control functions
