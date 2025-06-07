@@ -597,6 +597,7 @@
         <div class="instructions">
             <strong>💡 How to use:</strong> Type in English or Franco-Arabic (like "7abibi", "salam"). 
             Press <strong>Space or Enter</strong> to auto-select the first suggestion, or use arrow keys to navigate and Enter to select.
+            <br><strong>📋 Paste & Go:</strong> Paste any Latin text and it will automatically transliterate to Arabic!
         </div>
 
         <div class="input-section">
@@ -880,6 +881,30 @@
                 hideSuggestions();
                 hideTypingIndicator();
             }
+        });
+
+        // Auto-transliterate on paste
+        textInput.addEventListener('paste', function(e) {
+            // Small delay to let the paste complete
+            setTimeout(() => {
+                const text = textInput.value.trim();
+                if (text.length > 0) {
+                    // Check if the pasted text contains Latin characters that might need transliteration
+                    const hasLatinText = /[a-zA-Z0-9]/.test(text);
+                    if (hasLatinText) {
+                        // Show notification about auto-transliteration
+                        showNotification('📋 Text pasted! Auto-transliterating...', 'info');
+                        
+                        // Auto-trigger transliteration after paste
+                        setTimeout(() => {
+                            transliterateAll();
+                        }, 500); // Small delay to show the pasted text first
+                    } else {
+                        // Show notification for Arabic text
+                        showNotification('📋 Arabic text pasted successfully!', 'success');
+                    }
+                }
+            }, 100);
         });
 
         // Handle keyboard navigation and space for auto-selection
@@ -1247,6 +1272,8 @@
             // Add type-specific styling
             if (type === 'error') {
                 notification.style.background = 'linear-gradient(135deg, #ff6b6b, #ee5a52)';
+            } else if (type === 'info') {
+                notification.style.background = 'linear-gradient(135deg, #667eea, #764ba2)';
             }
             
             document.body.appendChild(notification);
